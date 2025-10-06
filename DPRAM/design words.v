@@ -72,3 +72,48 @@ Starts the write and read clocks,
 Initializes signals to zero,
 Stops simulation after some time.
 ✅ It’s like the outer box that holds both the real circuit and the testing setup.
+ ------------------------------------------------------------------
+CASE 1 – Write and Read same address
+Driver Sent → The driver tells the design:
+“Write data 0x1111 into address 0.”
+Monitor: WRITE observed → The monitor sees that a write happened at address 0.
+Scoreboard: WRITE update → The scoreboard stores that value (0x1111 at address 0).
+Generator CASE1 message → This tells us the generator is now testing a write and read to the same address.
+Then driver sends a read command → “Read from address 0.”
+Monitor: READ observed → The monitor sees the read happening.
+Scoreboard: READ check → It checks if the read data matches what was written.
+**PASS: Address 0 read gives 0x1111 → correct result.
+----------------------------------------------
+CASE 2 – Read from an address that was never written
+Driver Sent → The driver tries to read from address 5 (which was never written).
+Monitor and Scoreboard → They see a read but no previous write to that address.
+Data Out = 0x0 → The design correctly returns 0 since it’s empty memory.
+PASS: It handled “read before write” correctly (returns 0).
+ -------------------------------------------------------
+CASE 3 – Overwrite same address twice
+Driver Sent → Writes 0xAAAA to address 1.
+Then again writes 0xBBBB to the same address 1 (second write replaces the first).
+Monitor and Scoreboard → They detect the latest write and update the stored value to 0xBBBB.
+Then a read happens from address 1 → returns 0xBBBB.
+PASS: The design correctly gives the latest written value.
+-----------------------------------------------------------
+CASE 4 – Read before any write
+Driver Sent → Reads from address 10, which has never been written.
+Monitor: READ observed, Scoreboard: READ check → Both confirm data is 0.
+PASS: Design shows 0 (since memory was never written there).
+--------------------------------------------------------
+CASE 5 – Simultaneous Read & Write
+Driver Sent → Write 0xDEADBEEFCAFE1234 to address 2 and read from address 2 at the same time.
+Monitor: WRITE observed → Sees the write action.
+Scoreboard: WRITE update → Stores the new data value at address 2.
+Monitor: READ observed → Sees a read happening for address 2.
+Scoreboard: READ check → Compares the read data and finds it correct.
+PASS: Both read and write worked together perfectly; data matched.
+ ---------------------------------------------------------------------
+Simulation End
+After all cases are completed:
+SIMULATION END
+Simulation complete via $finish
+Means:
+✅ All tests finished successfully, and no errors were found.
+Your design is working as expected!
